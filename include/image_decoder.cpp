@@ -1,4 +1,5 @@
 #include "image_decoder.h"
+#include "commons.h"
 #include <iostream>
 
 using namespace std;
@@ -24,50 +25,96 @@ cv::Mat classifyPixels(cv::Mat &img, vector<cv::Mat> &templates)
 {
     cv::Mat result(img.rows, img.cols, CV_32FC1);
 
-    int category_index = 0;
+    int category_index = 1;
     for (cv::Mat &tem : templates)
     {
         cv::Mat res;
         cv::matchTemplate(
             img, tem, res, cv::TM_CCOEFF_NORMED);
-        cv::threshold(res, res, CLASSIFCATION_THRESHOLD, 1.0, cv::THRESH_BINARY);
 
-        // Set places where the template was found to 1 with the given category index
+        cv::threshold(res, res, CLASSIFCATION_THRESHOLD, category_index, cv::THRESH_BINARY);
+
+        // Replace non-zero values in main result matrix with the category index
         for (int i = 0; i < res.rows; i++)
         {
             for (int j = 0; j < res.cols; j++)
             {
-                if (res.at<float>(i, j) == 1.0)
+                if (res.at<float>(i, j) != 0)
                 {
-                    result.at<int>(i, j) = category_index;
+                    result.at<float>(i, j) = category_index;
                 }
             }
         }
 
         category_index++;
+        break;
     }
 
     return result;
 }
 
-cv::Mat generatePositionMatrix(cv::Mat pixelsMat, int rows, int cols)
+cv::Mat generatePositionMatrix(cv::Mat pixelsMat)
 {
-    cv::Mat result(rows, cols, CV_32FC1);
+    cv::Mat result(MATRIX_ROWS, MATRIX_COLS, CV_32FC1);
 
-    int row_ratio = pixelsMat.rows / rows;
-    int col_ratio = pixelsMat.cols / cols;
+    // Crop the matrix from the original image
+    cv::Rect area(MATRIX_OFFSET_X, MATRIX_OFFSET_Y,
+                  pixelsMat.cols - MATRIX_OFFSET_X - MATRIX_MARGIN_RIGHT,
+                  pixelsMat.rows - MATRIX_OFFSET_Y);
 
-    for (int i = 0; i < pixelsMat.rows; i++)
+    cout << "area: " << area << endl;
+    cv::Mat cropped = pixelsMat(area);
+
+    int class_counts[MATRIX_ROWS][MATRIX_COLS][26] = {0}; // [row][col][class]
+
+    for (int i = 0; i < cropped.rows; i++)
     {
-        for (int j = 0; j < pixelsMat.cols; j++)
+        for (int j = 0; j < cropped.cols; j++)
         {
-            int row_index = i / row_ratio;
-            int col_index = j / col_ratio;
+            int row = i / CELL_SIZE_Y;
+            int col = j / CELL_SIZE_X;
 
-            // TODO: Save a count of each category falling in this cell
-            // then set its value as the category that has the highest count
+            if (row >= MATRIX_ROWS || col >= MATRIX_COLS)
+            {
+                continue;
+            }
+
+            int class_index = cropped.at<float>(i, j);
+
+            if (class_index == 0)
+            {
+                continue;
+            }
+
+            class_counts[row][col][class_index]++;
         }
     }
+
+    cout << "Ends generatePositionMatrix...\n"
+         << endl;
+
+    // Find the most frequent class in each cell
+    for (int i = 0; i < MATRIX_ROWS; i++)
+    {
+        for (int j = 0; j < MATRIX_COLS; j++)
+        {
+            int max_class_index = 0;
+            int max_class_count = 0;
+            for (int k = 0; k < 26; k++)
+            {
+                if (class_counts[i][j][k] > max_class_count)
+                {
+                    max_class_count = class_counts[i][j][k];
+                    max_class_index = k;
+                }
+            }
+
+            result.at<float>(i, j) = max_class_index;
+        }
+    }
+
+    cout << "Ends checking higher classes...\n"
+         << endl;
 
     return result;
 }

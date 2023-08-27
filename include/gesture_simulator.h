@@ -4,7 +4,7 @@
 #include <iostream>
 #include <Windows.h>
 
-void moveMouse(HWND hwnd, int x, int y, char direction);
+void moveMouse(HWND hwnd, int x, int y, int direction);
 
 void clickMouse(HWND hwnd, int x, int y);
 

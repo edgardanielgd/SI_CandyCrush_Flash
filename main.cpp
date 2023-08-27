@@ -1,6 +1,7 @@
 #include "opencv2/imgproc.hpp"
 #include "opencv2/highgui.hpp"
 #include "image_decoder.h"
+#include "gesture_simulator.h"
 #include <Windows.h>
 #include <iostream>
 #include <tchar.h>
@@ -22,6 +23,9 @@ cv::Mat hwnd2mat(HWND hwnd)
 
     RECT windowsize; // get the height and width of the screen
     GetClientRect(hwnd, &windowsize);
+
+    cout << windowsize.top << " " << windowsize.left << endl;
+    cout << windowsize.bottom << " " << windowsize.right << endl;
 
     srcheight = windowsize.bottom;
     srcwidth = windowsize.right;
@@ -67,16 +71,28 @@ int main()
     printf("Starts...\n");
     // HWND hwndTarget = GetDesktopWindow();
     HWND hwndTarget = FindWindow(NULL, _T("Adobe Flash Player 10"));
+
+    cout << "Before GetClientRect (1)" << endl;
+    RECT windowsize; // get the height and width of the screen
+    GetClientRect(hwndTarget, &windowsize);
+
+    cout << windowsize.top << " " << windowsize.left << endl;
+    cout << windowsize.bottom << " " << windowsize.right << endl;
+
     cout << hwndTarget << endl;
     int key = 0;
 
-    SetForegroundWindow(hwndTarget);
+    SetWindowPos(
+        hwndTarget, HWND_TOPMOST,
+        0, 0, 800, 650,
+        SWP_SHOWWINDOW);
 
     printf("Waiting for 10 seconds...\n");
-    Sleep(10000);
     printf("Starts...\n");
 
+    cout << "Before GetClientRect (2)" << endl;
     cv::Mat src = hwnd2mat(hwndTarget);
+    cv::imwrite("test.png", src);
 
     cout << src.size() << endl;
 
@@ -86,10 +102,50 @@ int main()
 
     cout << result.size() << endl;
 
-    result = result * (255 / templates->size());
+    // Lets see all classes with different colors
+    int colors[26][3];
+    for (int i = 0; i < 26; i++)
+    {
+        colors[i][0] = rand() % 255;
+        colors[i][1] = rand() % 256;
+        colors[i][2] = rand() % 256;
+    }
+
+    cv::namedWindow("classified", cv::WINDOW_NORMAL);
+    cv::imshow("classified", src);
+
+    // Format results matrix to print each class with a different color
+    // for (int i = 0; i < result.rows; i++)
+    // {
+    //     for (int j = 0; j < result.cols; j++)
+    //     {
+    //         int index = result.at<float>(i, j) - 1;
+    //         if (index >= 0)
+    //         {
+    //             result.at<cv::Vec3b>(i, j) = cv::Vec3b(
+    //                 colors[index][0], colors[index][1], colors[index][2]);
+    //         }
+    //         else
+    //         {
+    //             result.at<cv::Vec3b>(i, j) = cv::Vec3b(0, 0, 0);
+    //         }
+    //     }
+    // }
 
     cv::namedWindow("output", cv::WINDOW_NORMAL);
     cv::imshow("output", result);
+
+    // Generate final matrix
+    cv::Mat matrix = generatePositionMatrix(result);
+    cv::FileStorage file("matrix.xml", cv::FileStorage::WRITE);
+    file << "matrix" << matrix;
+    file.release();
+
+    // Simulate mouse movement in a given direction
+    int x, y, direction;
+    // cin >> x >> y >> direction;
+
+    moveMouse(hwndTarget, 3, 3, 3);
 
     while (key != 27)
     {

@@ -9,6 +9,12 @@ all: main
 main:
 	$(CC) main.cpp $(CPP_FILES) -o main.exe $(CFLAGS) $(PKG_FLAGS) $(INC_FLAGES)
 
+cpos:
+	$(CC) getcoords.cpp -o cpos.exe -lgdi32
+
+cposexec:
+	./cpos
+
 exec:
 	./main
 
