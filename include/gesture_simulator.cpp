@@ -21,11 +21,17 @@ void moveMouse(HWND hwnd, int x, int y, int direction)
     int px = MATRIX_OFFSET_X + EXTRA_WINDOW_OFFSET_X + left + y * CELL_SIZE_X + CELL_SIZE_X / 2;
     int py = MATRIX_OFFSET_Y + EXTRA_WINDOW_OFFSET_Y + top + x * CELL_SIZE_Y + CELL_SIZE_Y / 2;
 
-    cout << px << " " << py << endl;
+    cout << "Asigna: " << px << " " << py << endl;
 
     SetCursorPos(px, py);
 
-    Sleep(10000);
+    POINT p;
+    if (GetCursorPos(&p))
+    {
+        cout << p.x << " " << p.y << endl;
+    }
+
+    Sleep(3000);
 
     /*
         Direction notation:
@@ -44,6 +50,7 @@ void moveMouse(HWND hwnd, int x, int y, int direction)
     input.type = INPUT_MOUSE;
     input.mi.mouseData = 0;
     input.mi.time = 0;
+    input.mi.dwFlags = MOUSEEVENTF_MOVE | MOUSEEVENTF_ABSOLUTE;
     input.mi.dx = px + x_offset;
     input.mi.dy = py + y_offset;
     input.mi.dwFlags = MOUSEEVENTF_LEFTDOWN;

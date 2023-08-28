@@ -83,9 +83,11 @@ int main()
     int key = 0;
 
     SetWindowPos(
-        hwndTarget, HWND_TOPMOST,
+        hwndTarget, NULL,
         0, 0, 800, 650,
         SWP_SHOWWINDOW);
+    SetActiveWindow(hwndTarget);
+    SetFocus(hwndTarget);
 
     printf("Waiting for 10 seconds...\n");
     printf("Starts...\n");
