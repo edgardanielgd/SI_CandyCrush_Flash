@@ -6,6 +6,7 @@
 
 void moveMouse(HWND hwnd, int x, int y, int direction);
 
-void clickMouse(HWND hwnd, int x, int y);
+// Have care, coordinates are in screen coordinates
+void clickMouse(HWND hwnd, int wx, int wy);
 
 #endif

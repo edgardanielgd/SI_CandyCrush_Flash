@@ -47,7 +47,6 @@ cv::Mat classifyPixels(cv::Mat &img, vector<cv::Mat> &templates)
         }
 
         category_index++;
-        break;
     }
 
     return result;
@@ -62,7 +61,6 @@ cv::Mat generatePositionMatrix(cv::Mat pixelsMat)
                   pixelsMat.cols - MATRIX_OFFSET_X - MATRIX_MARGIN_RIGHT,
                   pixelsMat.rows - MATRIX_OFFSET_Y);
 
-    cout << "area: " << area << endl;
     cv::Mat cropped = pixelsMat(area);
 
     int class_counts[MATRIX_ROWS][MATRIX_COLS][26] = {0}; // [row][col][class]

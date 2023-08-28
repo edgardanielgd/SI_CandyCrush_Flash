@@ -2,6 +2,7 @@
 #include "opencv2/highgui.hpp"
 #include "image_decoder.h"
 #include "gesture_simulator.h"
+#include "commons.h"
 #include <Windows.h>
 #include <iostream>
 #include <tchar.h>
@@ -68,53 +69,24 @@ int main()
     // First lets read all templates we want to search for
     vector<cv::Mat> matTemplates = getTemplates();
 
-    printf("Starts...\n");
     // HWND hwndTarget = GetDesktopWindow();
     HWND hwndTarget = FindWindow(NULL, _T("Adobe Flash Player 10"));
-
-    cout << "Before GetClientRect (1)" << endl;
     RECT windowsize; // get the height and width of the screen
     GetClientRect(hwndTarget, &windowsize);
 
-    cout << windowsize.top << " " << windowsize.left << endl;
-    cout << windowsize.bottom << " " << windowsize.right << endl;
-
-    cout << hwndTarget << endl;
     int key = 0;
 
-    SetWindowPos(
-        hwndTarget, NULL,
-        0, 0, 800, 650,
-        SWP_SHOWWINDOW);
-    SetActiveWindow(hwndTarget);
-    SetFocus(hwndTarget);
-
-    printf("Waiting for 10 seconds...\n");
-    printf("Starts...\n");
-
-    cout << "Before GetClientRect (2)" << endl;
-    cv::Mat src = hwnd2mat(hwndTarget);
-    cv::imwrite("test.png", src);
-
-    cout << src.size() << endl;
-
-    printf("Starts classifyPixels...\n");
-    cv::Mat result = classifyPixels(src, matTemplates);
-    printf("Ends classifyPixels...\n");
-
-    cout << result.size() << endl;
-
     // Lets see all classes with different colors
-    int colors[26][3];
-    for (int i = 0; i < 26; i++)
-    {
-        colors[i][0] = rand() % 255;
-        colors[i][1] = rand() % 256;
-        colors[i][2] = rand() % 256;
-    }
+    // int colors[26][3];
+    // for (int i = 0; i < 26; i++)
+    // {
+    //     colors[i][0] = rand() % 255;
+    //     colors[i][1] = rand() % 256;
+    //     colors[i][2] = rand() % 256;
+    // }
 
-    cv::namedWindow("classified", cv::WINDOW_NORMAL);
-    cv::imshow("classified", src);
+    // cv::namedWindow("classified", cv::WINDOW_NORMAL);
+    // cv::imshow("classified", src);
 
     // Format results matrix to print each class with a different color
     // for (int i = 0; i < result.rows; i++)
@@ -134,26 +106,48 @@ int main()
     //     }
     // }
 
-    cv::namedWindow("output", cv::WINDOW_NORMAL);
-    cv::imshow("output", result);
+    // cv::namedWindow("output", cv::WINDOW_NORMAL);
+    // cv::imshow("output", result);
 
     // Generate final matrix
+
+    SetWindowPos(
+        hwndTarget, NULL,
+        0, 0, 800, 650,
+        SWP_SHOWWINDOW);
+    SetActiveWindow(hwndTarget);
+    SetFocus(hwndTarget);
+
+    cv::Mat src = hwnd2mat(hwndTarget);
+
+    cv::Rect area(MATRIX_OFFSET_X, MATRIX_OFFSET_Y,
+                  src.cols - MATRIX_OFFSET_X - MATRIX_MARGIN_RIGHT,
+                  src.rows - MATRIX_OFFSET_Y);
+
+    cv::imwrite("original.png", src);
+
+    cv::Mat src_cropped = src(area);
+    cv::imwrite("original_cropped.png", src_cropped);
+
+    cv::Mat result = classifyPixels(src, matTemplates);
+    cv::imwrite("result.png", result);
+
+    cv::Mat result_cropped = result(area);
+    cv::imwrite("result_cropped.png", result_cropped);
+
+    // Simulate mouse movement in a given direction
+    int x, y, direction;
+
+    moveMouse(hwndTarget, 0, 0, 1);
+
     cv::Mat matrix = generatePositionMatrix(result);
     cv::FileStorage file("matrix.xml", cv::FileStorage::WRITE);
     file << "matrix" << matrix;
     file.release();
 
-    // Simulate mouse movement in a given direction
-    int x, y, direction;
-    // cin >> x >> y >> direction;
-
-    moveMouse(hwndTarget, 3, 3, 3);
-
     while (key != 27)
     {
-        // cv::Mat src = hwnd2mat(hwndTarget);
-        // cv::imshow("output", src);
-        // cout << src << endl;
+
         key = cv::waitKey(60); // you can change wait time
     }
 
