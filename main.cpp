@@ -25,9 +25,6 @@ cv::Mat hwnd2mat(HWND hwnd)
     RECT windowsize; // get the height and width of the screen
     GetClientRect(hwnd, &windowsize);
 
-    cout << windowsize.top << " " << windowsize.left << endl;
-    cout << windowsize.bottom << " " << windowsize.right << endl;
-
     srcheight = windowsize.bottom;
     srcwidth = windowsize.right;
     height = windowsize.bottom / 1; // change this to whatever size you want to resize to
@@ -76,57 +73,27 @@ int main()
 
     int key = 0;
 
-    // Generate final matrix
-
     SetWindowPos(
         hwndTarget, NULL,
-        0, 0, 800, 650,
+        0, 0, WINDOW_WIDTH, WINDOW_HEIGHT,
         SWP_SHOWWINDOW);
     SetActiveWindow(hwndTarget);
     SetFocus(hwndTarget);
 
-    cv::Mat src = hwnd2mat(hwndTarget);
-
-    cv::imwrite("output/original.png", src);
-
     // Crop the image and get only the candies matrix
     cv::Rect area(MATRIX_OFFSET_X, MATRIX_OFFSET_Y,
-                  src.cols - MATRIX_OFFSET_X - MATRIX_MARGIN_RIGHT,
-                  src.rows - MATRIX_OFFSET_Y - MATRIX_MARGIN_BOTTOM);
-
-    cv::Mat src_cropped = src(area);
-    cv::imwrite("output/original_cropped.png", src_cropped);
-
-    cv::Mat result = classifyPixels(src_cropped, matTemplates);
-    cv::imwrite("output/result.png", result);
-
-    // Simulate mouse movement in a given direction
-    int x, y, direction;
+                  WINDOW_WIDTH - MATRIX_OFFSET_X - MATRIX_MARGIN_RIGHT,
+                  WINDOW_HEIGHT - MATRIX_OFFSET_Y - MATRIX_MARGIN_BOTTOM);
 
     // moveMouse(hwndTarget, 0, 0, 1);
 
-    cv::Mat matrix = generatePositionMatrix(result);
-    cv::FileStorage file("output/matrix.xml", cv::FileStorage::WRITE);
-    file << "matrix" << matrix;
-    file.release();
-
-    for (int i = 0; i < matrix.rows; i++)
-    {
-        for (int j = 0; j < matrix.cols; j++)
-        {
-            cv::Rect area2(j * CELL_SIZE_X, i * CELL_SIZE_Y,
-                           min(CELL_SIZE_X, src_cropped.cols - j * CELL_SIZE_X),
-                           min(CELL_SIZE_Y, src_cropped.rows - i * CELL_SIZE_Y));
-
-            cv::Mat cell = src_cropped(area2);
-            cv::imwrite("output/cell_" + to_string(i) + "_" + to_string(j) + ".png", cell);
-        }
-        cout << endl;
-    }
-
     while (key != 27)
     {
+        cv::Mat src = hwnd2mat(hwndTarget);
+        cv::Mat src_cropped = src(area);
+        cv::Mat matrix = generatePositionMatrix2(src_cropped, matTemplates);
 
+        printf("Ends here\n");
         key = cv::waitKey(60); // you can change wait time
     }
 

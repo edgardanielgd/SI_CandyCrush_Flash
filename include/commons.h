@@ -12,4 +12,7 @@ const int CELL_SIZE_Y = 63;
 const int MATRIX_ROWS = 9;
 const int MATRIX_COLS = 9;
 
+const int WINDOW_WIDTH = 800;
+const int WINDOW_HEIGHT = 650;
+
 #endif

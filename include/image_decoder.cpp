@@ -1,5 +1,6 @@
 #include "image_decoder.h"
 #include "commons.h"
+#include <Windows.h>
 #include <iostream>
 
 using namespace std;
@@ -19,6 +20,45 @@ vector<cv::Mat> getTemplates()
     }
 
     return matTemplates;
+}
+
+cv::Mat generatePositionMatrix2(cv::Mat &img, vector<cv::Mat> &templates)
+{
+    cv::Mat result(MATRIX_ROWS, MATRIX_COLS, CV_32FC1);
+
+    for (int i = 0; i < MATRIX_ROWS; i++)
+    {
+        for (int j = 0; j < MATRIX_COLS; j++)
+        {
+            cv::Rect area2(j * CELL_SIZE_X, i * CELL_SIZE_Y,
+                           min(CELL_SIZE_X, img.cols - j * CELL_SIZE_X),
+                           min(CELL_SIZE_Y, img.rows - i * CELL_SIZE_Y));
+
+            cv::Mat cell = img(area2);
+
+            int classCount = 1;
+            double betterSSIM = -1;
+
+            for (cv::Mat &tem : templates)
+            {
+                cv::Mat toCompare;
+                cv::resize(tem, toCompare, cv::Size(cell.cols, cell.rows), cv::INTER_LINEAR);
+
+                cv::Scalar ssim = cv::PSNR(cell, toCompare);
+                const double ssimValue = ssim[0];
+
+                if (ssimValue > betterSSIM)
+                {
+                    betterSSIM = ssimValue;
+                    result.at<float>(i, j) = classCount;
+                }
+
+                classCount++;
+            }
+        }
+    }
+
+    return result;
 }
 
 cv::Mat classifyPixels(cv::Mat &img, vector<cv::Mat> &templates)
@@ -81,9 +121,6 @@ cv::Mat generatePositionMatrix(cv::Mat pixelsMat)
         }
     }
 
-    cout << "Ends generatePositionMatrix...\n"
-         << endl;
-
     // Find the most frequent class in each cell
     for (int i = 0; i < MATRIX_ROWS; i++)
     {
@@ -103,9 +140,6 @@ cv::Mat generatePositionMatrix(cv::Mat pixelsMat)
             result.at<float>(i, j) = max_class_index;
         }
     }
-
-    cout << "Ends checking higher classes...\n"
-         << endl;
 
     return result;
 }

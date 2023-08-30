@@ -23,12 +23,15 @@ vector<cv::Mat> getTemplates();
 
 // After applying a template, each pixel will have a chance
 // to be classified as a candy or not. we should set a threshold
-const double CLASSIFCATION_THRESHOLD = 0.5;
+const double CLASSIFCATION_THRESHOLD = 0.6;
 
 // Classify pixels in a given image, template by template
 cv::Mat classifyPixels(cv::Mat &img, vector<cv::Mat> &templates);
 
 // Generate a matrix from pixels classification (normalize to a given small matrix)
 cv::Mat generatePositionMatrix(cv::Mat pixelsMat);
+
+// Generate a matrix from pixels classification (normalize to a given small matrix)
+cv::Mat generatePositionMatrix2(cv::Mat &img, vector<cv::Mat> &templates);
 
 #endif
