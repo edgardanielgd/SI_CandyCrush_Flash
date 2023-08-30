@@ -56,18 +56,11 @@ cv::Mat generatePositionMatrix(cv::Mat pixelsMat)
 {
     cv::Mat result(MATRIX_ROWS, MATRIX_COLS, CV_32FC1);
 
-    // Crop the matrix from the original image
-    cv::Rect area(MATRIX_OFFSET_X, MATRIX_OFFSET_Y,
-                  pixelsMat.cols - MATRIX_OFFSET_X - MATRIX_MARGIN_RIGHT,
-                  pixelsMat.rows - MATRIX_OFFSET_Y);
-
-    cv::Mat cropped = pixelsMat(area);
-
     int class_counts[MATRIX_ROWS][MATRIX_COLS][26] = {0}; // [row][col][class]
 
-    for (int i = 0; i < cropped.rows; i++)
+    for (int i = 0; i < pixelsMat.rows; i++)
     {
-        for (int j = 0; j < cropped.cols; j++)
+        for (int j = 0; j < pixelsMat.cols; j++)
         {
             int row = i / CELL_SIZE_Y;
             int col = j / CELL_SIZE_X;
@@ -77,7 +70,7 @@ cv::Mat generatePositionMatrix(cv::Mat pixelsMat)
                 continue;
             }
 
-            int class_index = cropped.at<float>(i, j);
+            int class_index = pixelsMat.at<float>(i, j);
 
             if (class_index == 0)
             {

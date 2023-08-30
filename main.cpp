@@ -76,39 +76,6 @@ int main()
 
     int key = 0;
 
-    // Lets see all classes with different colors
-    // int colors[26][3];
-    // for (int i = 0; i < 26; i++)
-    // {
-    //     colors[i][0] = rand() % 255;
-    //     colors[i][1] = rand() % 256;
-    //     colors[i][2] = rand() % 256;
-    // }
-
-    // cv::namedWindow("classified", cv::WINDOW_NORMAL);
-    // cv::imshow("classified", src);
-
-    // Format results matrix to print each class with a different color
-    // for (int i = 0; i < result.rows; i++)
-    // {
-    //     for (int j = 0; j < result.cols; j++)
-    //     {
-    //         int index = result.at<float>(i, j) - 1;
-    //         if (index >= 0)
-    //         {
-    //             result.at<cv::Vec3b>(i, j) = cv::Vec3b(
-    //                 colors[index][0], colors[index][1], colors[index][2]);
-    //         }
-    //         else
-    //         {
-    //             result.at<cv::Vec3b>(i, j) = cv::Vec3b(0, 0, 0);
-    //         }
-    //     }
-    // }
-
-    // cv::namedWindow("output", cv::WINDOW_NORMAL);
-    // cv::imshow("output", result);
-
     // Generate final matrix
 
     SetWindowPos(
@@ -120,30 +87,42 @@ int main()
 
     cv::Mat src = hwnd2mat(hwndTarget);
 
+    cv::imwrite("output/original.png", src);
+
+    // Crop the image and get only the candies matrix
     cv::Rect area(MATRIX_OFFSET_X, MATRIX_OFFSET_Y,
                   src.cols - MATRIX_OFFSET_X - MATRIX_MARGIN_RIGHT,
-                  src.rows - MATRIX_OFFSET_Y);
-
-    cv::imwrite("original.png", src);
+                  src.rows - MATRIX_OFFSET_Y - MATRIX_MARGIN_BOTTOM);
 
     cv::Mat src_cropped = src(area);
-    cv::imwrite("original_cropped.png", src_cropped);
+    cv::imwrite("output/original_cropped.png", src_cropped);
 
-    cv::Mat result = classifyPixels(src, matTemplates);
-    cv::imwrite("result.png", result);
-
-    cv::Mat result_cropped = result(area);
-    cv::imwrite("result_cropped.png", result_cropped);
+    cv::Mat result = classifyPixels(src_cropped, matTemplates);
+    cv::imwrite("output/result.png", result);
 
     // Simulate mouse movement in a given direction
     int x, y, direction;
 
-    moveMouse(hwndTarget, 0, 0, 1);
+    // moveMouse(hwndTarget, 0, 0, 1);
 
     cv::Mat matrix = generatePositionMatrix(result);
-    cv::FileStorage file("matrix.xml", cv::FileStorage::WRITE);
+    cv::FileStorage file("output/matrix.xml", cv::FileStorage::WRITE);
     file << "matrix" << matrix;
     file.release();
+
+    for (int i = 0; i < matrix.rows; i++)
+    {
+        for (int j = 0; j < matrix.cols; j++)
+        {
+            cv::Rect area2(j * CELL_SIZE_X, i * CELL_SIZE_Y,
+                           min(CELL_SIZE_X, src_cropped.cols - j * CELL_SIZE_X),
+                           min(CELL_SIZE_Y, src_cropped.rows - i * CELL_SIZE_Y));
+
+            cv::Mat cell = src_cropped(area2);
+            cv::imwrite("output/cell_" + to_string(i) + "_" + to_string(j) + ".png", cell);
+        }
+        cout << endl;
+    }
 
     while (key != 27)
     {

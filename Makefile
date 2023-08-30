@@ -12,11 +12,17 @@ main:
 cpos:
 	$(CC) getcoords.cpp -o cpos.exe -lgdi32
 
+sensorTest:
+	$(CC) testImageCrop.cpp $(CPP_FILES) -o sensorTest.exe $(CFLAGS) $(PKG_FLAGS) $(INC_FLAGES)
+
 cposexec:
 	./cpos
 
 exec:
 	./main
+
+sensor:
+	./sensorTest
 
 clean:
 	del main.exe
