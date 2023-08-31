@@ -10,12 +10,10 @@ using namespace std;
 
 const string TEMPLATES_PATH = "templates\\";
 const string templates[] = {
-    "PurpleCandy.png", "RedCandy.png", "BlueCandy.png", "YellowCandy.png",
-    "GreenCandy.png", "OrangeCandy.png", "PurpleVertCandy.png", "PurpleHorizCandy.png",
-    "RedVertCandy.png", "RedHorizCandy.png", "BlueVertCandy.png", "BlueHorizCandy.png",
-    "YellowVertCandy.png", "YellowHorizCandy.png", "GreenVertCandy.png", "GreenHorizCandy.png",
-    "OrangeVertCandy.png", "OrangeHorizCandy.png", "PackedPurpleCandy.png", "PackedRedCandy.png",
-    "PackedBlueCandy.png", "PackedYellowCandy.png", "PackedGreenCandy.png", "PackedOrangeCandy.png",
+    "PurpleCandy.png", "RedCandy.png", "BlueCandy.png", "YellowCandy.png", "GreenCandy.png", "OrangeCandy.png",
+    "PurpleVertCandy.png", "RedVertCandy.png", "BlueVertCandy.png", "YellowVertCandy.png", "GreenVertCandy.png", "OrangeVertCandy.png",
+    "PurpleHorizCandy.png", "RedHorizCandy.png", "BlueHorizCandy.png", "YellowHorizCandy.png", "GreenHorizCandy.png", "OrangeHorizCandy.png",
+    "PackedPurpleCandy.png", "PackedRedCandy.png", "PackedBlueCandy.png", "PackedYellowCandy.png", "PackedGreenCandy.png", "PackedOrangeCandy.png",
     "ColorfulCandy.png"};
 
 // Array of templates to search

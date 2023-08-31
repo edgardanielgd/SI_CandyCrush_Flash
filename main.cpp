@@ -3,6 +3,7 @@
 #include "image_decoder.h"
 #include "gesture_simulator.h"
 #include "commons.h"
+#include "agent.h"
 #include <Windows.h>
 #include <iostream>
 #include <tchar.h>
@@ -22,13 +23,10 @@ cv::Mat hwnd2mat(HWND hwnd)
     hwindowCompatibleDC = CreateCompatibleDC(hwindowDC);
     SetStretchBltMode(hwindowCompatibleDC, COLORONCOLOR);
 
-    RECT windowsize; // get the height and width of the screen
-    GetClientRect(hwnd, &windowsize);
-
-    srcheight = windowsize.bottom;
-    srcwidth = windowsize.right;
-    height = windowsize.bottom / 1; // change this to whatever size you want to resize to
-    width = windowsize.right / 1;
+    srcheight = WINDOW_HEIGHT;
+    srcwidth = WINDOW_WIDTH;
+    height = WINDOW_HEIGHT; // change this to whatever size you want to resize to
+    width = WINDOW_WIDTH;
 
     src.create(height, width, CV_8UC4);
 
@@ -73,13 +71,6 @@ int main()
 
     int key = 0;
 
-    SetWindowPos(
-        hwndTarget, NULL,
-        0, 0, WINDOW_WIDTH, WINDOW_HEIGHT,
-        SWP_SHOWWINDOW);
-    SetActiveWindow(hwndTarget);
-    SetFocus(hwndTarget);
-
     // Crop the image and get only the candies matrix
     cv::Rect area(MATRIX_OFFSET_X, MATRIX_OFFSET_Y,
                   WINDOW_WIDTH - MATRIX_OFFSET_X - MATRIX_MARGIN_RIGHT,
@@ -87,13 +78,33 @@ int main()
 
     // moveMouse(hwndTarget, 0, 0, 1);
 
+    Agent agent = Agent();
+
     while (key != 27)
     {
+        SetWindowPos(
+            hwndTarget, NULL,
+            0, 0, WINDOW_WIDTH, WINDOW_HEIGHT,
+            SWP_SHOWWINDOW);
+        SetActiveWindow(hwndTarget);
+        SetFocus(hwndTarget);
+
         cv::Mat src = hwnd2mat(hwndTarget);
         cv::Mat src_cropped = src(area);
         cv::Mat matrix = generatePositionMatrix2(src_cropped, matTemplates);
 
-        printf("Ends here\n");
+        Agent::Movement move = agent.f(matrix);
+
+        if (move.x != -1 && move.y != -1)
+        {
+
+            cout << move.x << " " << move.y << endl;
+            moveMouse(hwndTarget, move.x, move.y, move.direction);
+        }
+
+        cout << matrix << endl;
+        Sleep(5000);
+
         key = cv::waitKey(60); // you can change wait time
     }
 
