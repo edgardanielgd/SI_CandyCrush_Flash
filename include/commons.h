@@ -2,9 +2,9 @@
 #define MATRIX_CONSTANTS_H
 
 const int MATRIX_OFFSET_X = 106;
-const int MATRIX_OFFSET_Y = 18;
+const int MATRIX_OFFSET_Y = 15;
 const int EXTRA_WINDOW_OFFSET_X = 0;
-const int EXTRA_WINDOW_OFFSET_Y = 30;
+const int EXTRA_WINDOW_OFFSET_Y = 20;
 const int MATRIX_MARGIN_RIGHT = 44;
 const int MATRIX_MARGIN_BOTTOM = 30;
 const int CELL_SIZE_X = 71;

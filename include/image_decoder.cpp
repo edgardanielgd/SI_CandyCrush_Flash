@@ -30,6 +30,7 @@ cv::Mat generatePositionMatrix2(cv::Mat &img, vector<cv::Mat> &templates)
     {
         for (int j = 0; j < MATRIX_COLS; j++)
         {
+
             cv::Rect area2(j * CELL_SIZE_X, i * CELL_SIZE_Y,
                            min(CELL_SIZE_X, img.cols - j * CELL_SIZE_X),
                            min(CELL_SIZE_Y, img.rows - i * CELL_SIZE_Y));
@@ -37,27 +38,40 @@ cv::Mat generatePositionMatrix2(cv::Mat &img, vector<cv::Mat> &templates)
             cv::Mat cell = img(area2);
 
             int classCount = 1;
-            double betterSSIM = -1;
+            int chosenClass = -1;
+            float betterSSIM = -1;
 
             for (cv::Mat &tem : templates)
             {
+
                 cv::Mat toCompare;
                 cv::resize(tem, toCompare, cv::Size(cell.cols, cell.rows), cv::INTER_LINEAR);
 
-                cv::Scalar ssim = cv::PSNR(cell, toCompare);
-                const double ssimValue = ssim[0];
+                cv::Mat result;
+                cv::matchTemplate(cell, toCompare, result, cv::TM_CCOEFF_NORMED);
 
-                if (ssimValue > betterSSIM)
+                auto vals = cv::sum(result);
+                float totalProbs = vals[0] + vals[1] + vals[2] + vals[3];
+
+                // cv::Scalar ssim = cv::PSNR(cell, toCompare);
+                // const double ssimValue = ssim[0];
+
+                if (totalProbs > betterSSIM)
                 {
-                    betterSSIM = ssimValue;
-                    result.at<float>(i, j) = classCount;
+                    betterSSIM = totalProbs;
+                    chosenClass = classCount;
                 }
 
+                //     cout << "Ends this" << endl;
+
                 classCount++;
+
+                //     cout << "Ends this x2" << endl;
             }
+
+            result.at<float>(i, j) = chosenClass;
         }
     }
-
     return result;
 }
 

@@ -91,6 +91,9 @@ int main()
 
         cv::Mat src = hwnd2mat(hwndTarget);
         cv::Mat src_cropped = src(area);
+
+        cv::imwrite("output/original_cropped.png", src_cropped);
+
         cv::Mat matrix = generatePositionMatrix2(src_cropped, matTemplates);
 
         Agent::Movement move = agent.f(matrix);
