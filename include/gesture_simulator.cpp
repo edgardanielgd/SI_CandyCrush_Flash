@@ -28,10 +28,10 @@ void moveMouse(HWND hwnd, int x, int y, int direction)
     int px = MATRIX_OFFSET_X + EXTRA_WINDOW_OFFSET_X + left + y * CELL_SIZE_X + CELL_SIZE_X / 2;
     int py = MATRIX_OFFSET_Y + EXTRA_WINDOW_OFFSET_Y + top + x * CELL_SIZE_Y + CELL_SIZE_Y / 2;
 
-    int y_offset = direction == 3 ? -CELL_SIZE_Y : direction == 4 ? CELL_SIZE_Y
-                                                                  : 0;
-    int x_offset = direction == 1 ? CELL_SIZE_X : direction == 2 ? -CELL_SIZE_X
-                                                                 : 0;
+    int y_offset = direction == UP ? -CELL_SIZE_Y : direction == DOWN ? CELL_SIZE_Y
+                                                                      : 0;
+    int x_offset = direction == RIGHT ? CELL_SIZE_X : direction == LEFT ? -CELL_SIZE_X
+                                                                        : 0;
 
     clickMouse(hwnd, px, py);
     Sleep(100);

@@ -37,7 +37,7 @@ cv::Mat generatePositionMatrix2(cv::Mat &img, vector<cv::Mat> &templates)
 
             cv::Mat cell = img(area2);
 
-            int classCount = 1;
+            int classCount = 0;
             int chosenClass = -1;
             float betterSSIM = -1;
 
@@ -69,7 +69,7 @@ cv::Mat generatePositionMatrix2(cv::Mat &img, vector<cv::Mat> &templates)
                 //     cout << "Ends this x2" << endl;
             }
 
-            result.at<float>(i, j) = chosenClass;
+            result.at<float>(i, j) = chosenClass == 24 ? chosenClass : chosenClass % 6;
         }
     }
     return result;

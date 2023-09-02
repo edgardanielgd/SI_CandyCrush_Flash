@@ -97,16 +97,25 @@ int main()
         cv::Mat matrix = generatePositionMatrix2(src_cropped, matTemplates);
 
         Agent::Movement move = agent.f(matrix);
+        cout << "Move: " << move.utility << endl;
+        cout << "Direction: " << move.direction << endl;
+        cout << "X: " << move.x << endl;
+        cout << "Y: " << move.y << endl;
 
         if (move.x != -1 && move.y != -1)
         {
-
             cout << move.x << " " << move.y << endl;
             moveMouse(hwndTarget, move.x, move.y, move.direction);
         }
 
         cout << matrix << endl;
-        Sleep(5000);
+
+        auto val = cv::sum(matrix);
+
+        if (val[0] == 0)
+            return 0;
+
+        Sleep(3000);
 
         key = cv::waitKey(60); // you can change wait time
     }

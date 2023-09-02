@@ -1,6 +1,7 @@
 {
     "files.associations": {
         "iostream": "cpp",
-        "stop_token": "cpp"
+        "stop_token": "cpp",
+        "ostream": "cpp"
     }
 }
