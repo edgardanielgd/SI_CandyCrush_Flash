@@ -52,18 +52,25 @@ cv::Mat generatePositionMatrix2(cv::Mat &img, vector<cv::Mat> &templates)
 
                 // cv::cvtColor(toCompare, toCompare, cv::COLOR_RGB2BGR565);
 
-                cv::Mat resultMatch;
-                cv::matchTemplate(cell, toCompare, resultMatch, cv::TM_CCOEFF_NORMED);
+                // cv::Mat resultMatch;
+                // cv::matchTemplate(cell, toCompare, resultMatch, cv::TM_CCOEFF_NORMED);
 
-                auto vals = cv::sum(resultMatch);
-                float totalProbs = vals[0] + vals[1] + vals[2] + vals[3];
+                // // Get max value
+                // double minVal, maxVal;
+                // cv::Point minLoc, maxLoc;
+                // cv::minMaxLoc(resultMatch, &minVal, &maxVal, &minLoc, &maxLoc, cv::Mat());
 
-                // cv::Scalar ssim = cv::PSNR(cell, toCompare);
-                // const double ssimValue = ssim[0] + ssim[1] + ssim[2] + ssim[3];
+                // if (i == 2 && j == 3)
+                // {
+                //     cout << classCount << "maxVal: " << maxVal << endl;
+                // }
 
-                if (totalProbs > betterSSIM)
+                cv::Scalar ssim = cv::PSNR(cell, toCompare);
+                const double ssimValue = ssim[0] + ssim[1] + ssim[2] + ssim[3];
+
+                if (ssimValue > betterSSIM)
                 {
-                    betterSSIM = totalProbs;
+                    betterSSIM = ssimValue;
                     chosenClass = classCount;
                 }
 

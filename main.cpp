@@ -104,13 +104,17 @@ int main()
         cv::Mat src = hwnd2mat(hwndTarget);
         cv::Mat src_cropped = src(area);
 
-        cv::imwrite("output/original_cropped.png", src_cropped);
+        // cv::imwrite("output/original_cropped.png", src_cropped);
+
+        // Load image from file
+        // cv::Mat src_cropped = cv::imread("output/original_cropped.png", cv::IMREAD_UNCHANGED);
 
         cv::Mat matrix = generatePositionMatrix2(src_cropped, matTemplates);
 
         // Sleep(5000);
         // cout << "======" << endl;
-        cout << matrix << endl;
+        // cout << matrix << endl;
+        // Sleep(3000);
         // cout << "======" << endl;
 
         Agent::Movement move = agent.f(matrix);
