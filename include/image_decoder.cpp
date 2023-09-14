@@ -52,10 +52,10 @@ cv::Mat generatePositionMatrix2(cv::Mat &img, vector<cv::Mat> &templates)
 
                 // cv::cvtColor(toCompare, toCompare, cv::COLOR_RGB2BGR565);
 
-                cv::Mat result;
-                cv::matchTemplate(cell, toCompare, result, cv::TM_CCOEFF_NORMED);
+                cv::Mat resultMatch;
+                cv::matchTemplate(cell, toCompare, resultMatch, cv::TM_CCOEFF_NORMED);
 
-                auto vals = cv::sum(result);
+                auto vals = cv::sum(resultMatch);
                 float totalProbs = vals[0] + vals[1] + vals[2] + vals[3];
 
                 // cv::Scalar ssim = cv::PSNR(cell, toCompare);

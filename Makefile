@@ -15,6 +15,9 @@ cpos:
 sensorTest:
 	$(CC) testImageCrop.cpp $(CPP_FILES) -o sensorTest.exe $(CFLAGS) $(PKG_FLAGS) $(INC_FLAGES)
 
+agentTest:
+	$(CC) testMove.cpp $(CPP_FILES) -o testMove.exe $(CFLAGS) $(PKG_FLAGS) $(INC_FLAGES)
+
 cposexec:
 	./cpos
 
@@ -23,6 +26,9 @@ exec:
 
 sensor:
 	./sensorTest
+
+agent:
+	./testMove
 
 clean:
 	del main.exe
