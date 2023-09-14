@@ -233,12 +233,5 @@ Agent::Movement Agent::f(cv::Mat perception)
         }
     }
 
-    cout << "Option " << endl;
-    cout << "r: " << optionFinal.r << endl;
-    cout << "l: " << optionFinal.l << endl;
-    cout << "t: " << optionFinal.t << endl;
-    cout << "b: " << optionFinal.b << endl;
-    cout << "utility: " << optionFinal.utility << endl;
-
     return move;
 }

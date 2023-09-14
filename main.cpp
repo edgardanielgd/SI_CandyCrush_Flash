@@ -7,8 +7,10 @@
 #include <Windows.h>
 #include <iostream>
 #include <tchar.h>
+#include <chrono>
 
 using namespace std;
+using namespace std::chrono;
 
 cv::Mat hwnd2mat(HWND hwnd)
 {
@@ -64,7 +66,6 @@ int main()
     // First lets read all templates we want to search for
     vector<cv::Mat> matTemplates = getTemplates();
 
-    // HWND hwndTarget = GetDesktopWindow();
     HWND hwndTarget = FindWindow(NULL, _T("Adobe Flash Player 10"));
     RECT windowsize; // get the height and width of the screen
     GetClientRect(hwndTarget, &windowsize);
@@ -76,12 +77,23 @@ int main()
                   WINDOW_WIDTH - MATRIX_OFFSET_X - MATRIX_MARGIN_RIGHT,
                   WINDOW_HEIGHT - MATRIX_OFFSET_Y - MATRIX_MARGIN_BOTTOM);
 
-    // moveMouse(hwndTarget, 0, 0, 1);
+    // Close after k second
+    auto start = high_resolution_clock::now();
 
     Agent agent = Agent();
 
-    while (key != 27)
+    while (true)
     {
+
+        // Check process should end
+        auto end = high_resolution_clock::now();
+        auto duration = duration_cast<seconds>(end - start);
+
+        if (duration.count() >= MAX_RUNTIME)
+        {
+            return 0;
+        }
+
         SetWindowPos(
             hwndTarget, NULL,
             0, 0, WINDOW_WIDTH, WINDOW_HEIGHT,
@@ -96,26 +108,17 @@ int main()
 
         cv::Mat matrix = generatePositionMatrix2(src_cropped, matTemplates);
 
+        // Sleep(5000);
+        // cout << "======" << endl;
+        cout << matrix << endl;
+        // cout << "======" << endl;
+
         Agent::Movement move = agent.f(matrix);
-        cout << "Move: " << move.utility << endl;
-        cout << "Direction: " << move.direction << endl;
-        cout << "X: " << move.x << endl;
-        cout << "Y: " << move.y << endl;
 
         if (move.x != -1 && move.y != -1)
         {
-            cout << move.x << " " << move.y << endl;
             moveMouse(hwndTarget, move.x, move.y, move.direction);
         }
-
-        cout << matrix << endl;
-
-        auto val = cv::sum(matrix);
-
-        if (val[0] == 0)
-            return 0;
-
-        Sleep(3000);
 
         key = cv::waitKey(60); // you can change wait time
     }
