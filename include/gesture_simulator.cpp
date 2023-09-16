@@ -19,9 +19,6 @@ void moveMouse(HWND hwnd, int x, int y, int direction)
     GetClientRect(hwnd, &windowsize);
 
     SetForegroundWindow(hwnd);
-
-    int width = windowsize.right;
-    int height = windowsize.bottom;
     int left = windowsize.left;
     int top = windowsize.top;
 

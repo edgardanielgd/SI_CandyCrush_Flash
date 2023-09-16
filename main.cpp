@@ -9,6 +9,10 @@
 #include <tchar.h>
 #include <chrono>
 
+#define EMULATOR_PATH "D:\\OneDriveData\\Documents-A\\UNAL20232\\SistemasInteligentes\\Game\\Flash Player by Mochilanegra.com.exe"
+#define GAME_PATH "D:\\OneDriveData\\Documents-A\\UNAL20232\\SistemasInteligentes\\Game\\Original\\candy-crush.swf"
+#define START_GAME true
+
 using namespace std;
 using namespace std::chrono;
 
@@ -66,11 +70,31 @@ int main()
     // First lets read all templates we want to search for
     vector<cv::Mat> matTemplates = getTemplates();
 
-    HWND hwndTarget = FindWindow(NULL, _T("Adobe Flash Player 10"));
+    // Start flash player process
+    if (START_GAME)
+    {
+        HINSTANCE command = ShellExecute(NULL, _T("open"), _T(EMULATOR_PATH), _T(GAME_PATH), NULL, SW_SHOW);
+        if ((INT_PTR)command <= 32)
+        {
+            cout << "Error: " << GetLastError() << endl;
+            return 1;
+        }
+    }
+
+    HWND hwndTarget = NULL;
+
+    while ((hwndTarget = FindWindow(NULL, _T("Adobe Flash Player 10"))) == NULL)
+    {
+        }
+
+    if (hwndTarget == NULL)
+    {
+        cout << "Error: " << GetLastError() << endl;
+        return 1;
+    }
+
     RECT windowsize; // get the height and width of the screen
     GetClientRect(hwndTarget, &windowsize);
-
-    int key = 0;
 
     // Crop the image and get only the candies matrix
     cv::Rect area(MATRIX_OFFSET_X, MATRIX_OFFSET_Y,
@@ -123,8 +147,6 @@ int main()
         {
             moveMouse(hwndTarget, move.x, move.y, move.direction);
         }
-
-        key = cv::waitKey(60); // you can change wait time
     }
 
     printf("Press any key to exit...\n");

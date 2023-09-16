@@ -169,7 +169,6 @@ Agent::Movement Agent::f(cv::Mat perception)
     move.direction = -1;
     move.utility = -1;
 
-    int utility = 0;
     Option option, optionFinal;
 
     for (int i = 0; i < MATRIX_ROWS; i++)
