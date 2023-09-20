@@ -23,10 +23,13 @@ public:
         int r, l, t, b, utility;
     };
 
-    // Lets get simple three neighbors completion
     Option evaluate(cv::Mat perception, int oi, int oj, int i, int j);
 
     Movement f(cv::Mat perception);
+
+    Option evaluate2(cv::Mat perception, int oi, int oj, int i, int j);
+
+    Movement f2(cv::Mat perception);
 };
 
 #endif

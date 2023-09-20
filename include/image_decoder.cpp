@@ -37,9 +37,6 @@ cv::Mat generatePositionMatrix2(cv::Mat &img, vector<cv::Mat> &templates)
 
             cv::Mat cell = img(area2);
 
-            // Transform to gray scale
-            // cv::cvtColor(cell, cell, cv::COLOR_RGB2BGR565);
-
             int classCount = 0;
             int chosenClass = -1;
             float betterSSIM = -1;
@@ -50,21 +47,6 @@ cv::Mat generatePositionMatrix2(cv::Mat &img, vector<cv::Mat> &templates)
                 cv::Mat toCompare;
                 cv::resize(tem, toCompare, cv::Size(cell.cols, cell.rows), cv::INTER_LINEAR);
 
-                // cv::cvtColor(toCompare, toCompare, cv::COLOR_RGB2BGR565);
-
-                // cv::Mat resultMatch;
-                // cv::matchTemplate(cell, toCompare, resultMatch, cv::TM_CCOEFF_NORMED);
-
-                // // Get max value
-                // double minVal, maxVal;
-                // cv::Point minLoc, maxLoc;
-                // cv::minMaxLoc(resultMatch, &minVal, &maxVal, &minLoc, &maxLoc, cv::Mat());
-
-                // if (i == 2 && j == 3)
-                // {
-                //     cout << classCount << "maxVal: " << maxVal << endl;
-                // }
-
                 cv::Scalar ssim = cv::PSNR(cell, toCompare);
                 const double ssimValue = ssim[0] + ssim[1] + ssim[2] + ssim[3];
 
@@ -74,14 +56,8 @@ cv::Mat generatePositionMatrix2(cv::Mat &img, vector<cv::Mat> &templates)
                     chosenClass = classCount;
                 }
 
-                //     cout << "Ends this" << endl;
-
                 classCount++;
-
-                //     cout << "Ends this x2" << endl;
             }
-
-            // result.at<float>(i, j) = chosenClass == 24 ? chosenClass : chosenClass % 6;
             result.at<float>(i, j) = chosenClass;
         }
     }
