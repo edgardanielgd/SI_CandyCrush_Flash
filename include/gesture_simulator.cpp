@@ -31,7 +31,7 @@ void moveMouse(HWND hwnd, int x, int y, int direction)
                                                                         : 0;
 
     clickMouse(hwnd, px, py);
-    Sleep(100);
+    Sleep(50);
     clickMouse(hwnd, px + x_offset, py + y_offset);
 }
 

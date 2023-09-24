@@ -105,6 +105,7 @@ int main()
     auto start = high_resolution_clock::now();
 
     Agent agent = Agent();
+    cv::Mat previous_matrix;
 
     while (true)
     {
@@ -126,6 +127,7 @@ int main()
 
         cv::Mat src = hwnd2mat(hwndTarget);
         cv::Mat src_cropped = src(area);
+
         cv::Mat matrix = generatePositionMatrix2(src_cropped, matTemplates);
         Agent::Movement move = agent.f(matrix);
 
@@ -133,6 +135,8 @@ int main()
         {
             moveMouse(hwndTarget, move.x, move.y, move.direction);
         }
+
+        Sleep(300);
     }
 
     printf("Press any key to exit...\n");
