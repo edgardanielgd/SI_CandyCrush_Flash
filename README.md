@@ -28,3 +28,9 @@ el uso del ratón a fin de mantener la pantalla del juego en primer plano y evit
 que el jugador autónomo se equivoque de ventana. (Por tanto, no se podrá
 interactuar con el ordenador mientras el jugador autónomo esté en funcionamiento)
 El juegador finalizará tras 4:45 minutos de ejecución.
+
+### Integrantes
+Miguel Angel Puentes Cespedes
+Edgar Daniel González Díaz
+
+Universidad Nacional de Colombia
