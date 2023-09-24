@@ -9,8 +9,8 @@
 #include <tchar.h>
 #include <chrono>
 
-#define EMULATOR_PATH "D:\\OneDriveData\\Documents-A\\UNAL20232\\SistemasInteligentes\\Game\\Flash Player by Mochilanegra.com.exe"
-#define GAME_PATH "D:\\OneDriveData\\Documents-A\\UNAL20232\\SistemasInteligentes\\Game\\Original\\candy-crush.swf"
+#define EMULATOR_PATH ".\\game\\Flash Player by Mochilanegra.com.exe"
+#define GAME_PATH ".\\game\\candy-crush.swf"
 #define START_GAME true
 
 using namespace std;
@@ -135,10 +135,7 @@ int main()
         {
             moveMouse(hwndTarget, move.x, move.y, move.direction);
         }
-
-        Sleep(300);
     }
 
-    printf("Press any key to exit...\n");
     return 0;
 }

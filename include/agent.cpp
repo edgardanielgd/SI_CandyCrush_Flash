@@ -7,6 +7,8 @@
 
 using namespace std;
 
+// FIRST APPROACH
+
 // Lets get simple three neighbors completion
 int Agent::evaluate(cv::Mat perception, int *counts, int oi, int oj, int i, int j)
 {
@@ -256,7 +258,8 @@ Agent::Movement Agent::f(cv::Mat perception)
     return move;
 }
 
-Agent::Option checkPossible(cv::Mat perception, int oi, int oj, int i, int j)
+// SECOND APPROACH
+Agent::Option checkPossible(cv::Mat perception, int *counts, int oi, int oj, int i, int j)
 {
 
     struct Agent::Option option;
@@ -271,19 +274,19 @@ Agent::Option checkPossible(cv::Mat perception, int oi, int oj, int i, int j)
 
     if (color == 24 && colorSide == 24)
     {
-        option.utility = 100;
+        option.utility = 200;
         return option;
     }
 
     if (color == 24 && colorSide >= 18 && colorSide <= 23)
     {
-        option.utility = 99;
+        option.utility = 180 + counts[colorSide % 6];
         return option;
     }
 
     if (color == 24 && colorSide >= 6 && colorSide <= 17)
     {
-        option.utility = 98;
+        option.utility = 170 + counts[colorSide % 6];
         return option;
     }
 
@@ -307,7 +310,7 @@ Agent::Option checkPossible(cv::Mat perception, int oi, int oj, int i, int j)
 
     if (color == 24)
     {
-        option.utility = 94;
+        option.utility = 80 + counts[colorSide % 6];
         return option;
     } // Empty
 
@@ -405,7 +408,7 @@ Agent::Option checkPossible(cv::Mat perception, int oi, int oj, int i, int j)
 }
 
 // Get all possible movements
-vector<Agent::Movement> getMovements(cv::Mat perception)
+vector<Agent::Movement> getMovements(cv::Mat perception, int *counts)
 {
     vector<Agent::Movement> possible_movements;
 
@@ -417,7 +420,7 @@ vector<Agent::Movement> getMovements(cv::Mat perception)
         {
             if (j <= 7)
             {
-                move = checkPossible(perception, i, j, i, j + 1);
+                move = checkPossible(perception, counts, i, j, i, j + 1);
 
                 if (move.utility > 0)
                 {
@@ -434,7 +437,7 @@ vector<Agent::Movement> getMovements(cv::Mat perception)
 
             if (j >= 1)
             {
-                move = checkPossible(perception, i, j, i, j - 1);
+                move = checkPossible(perception, counts, i, j, i, j - 1);
 
                 if (move.utility > 0)
                 {
@@ -451,7 +454,7 @@ vector<Agent::Movement> getMovements(cv::Mat perception)
 
             if (i >= 1)
             {
-                move = checkPossible(perception, i, j, i - 1, j);
+                move = checkPossible(perception, counts, i, j, i - 1, j);
 
                 if (move.utility > 0)
                 {
@@ -468,7 +471,7 @@ vector<Agent::Movement> getMovements(cv::Mat perception)
 
             if (i <= 7)
             {
-                move = checkPossible(perception, i, j, i + 1, j);
+                move = checkPossible(perception, counts, i, j, i + 1, j);
 
                 if (move.utility > 0)
                 {
@@ -506,58 +509,110 @@ void removeCandy(cv::Mat &momentum, int x, int y)
 
 void removeCandy2(cv::Mat &perception, int x, int y, int row_count = 1)
 {
-    for (int i = y; i > 0; i--)
+    if (perception.at<float>(x, y) == -1)
+        return;
+    for (int i = x; i >= 0; i--)
     {
-        if (i - row_count > 0)
+        if (i - row_count >= 0)
         {
             // Just replace with the one above
-            perception.at<float>(x, i) = perception.at<float>(x, i - row_count);
+            perception.at<float>(i, y) = perception.at<float>(i - row_count, y);
         }
         else
         {
-            perception.at<float>(x, i) = -1;
+            perception.at<float>(i, y) = -1;
         }
     }
 }
 
-// utility for evaluating a neighbor
-void evaluateNeighbor(cv::Mat &perception, cv::Mat &momentum, int i, int j, int color_index, bool &has_factor, int &neighbors)
+// Mark candy as matched and check if should be matched
+void evaluateCandy(cv::Mat perception, cv::Mat &matched_candies_src, int x, int y)
 {
-    int neighbor_momentum = momentum.at<float>(i, j);
-    int new_i = i + neighbor_momentum;
+    if (perception.at<float>(x, y) == -1)
+        return;
 
-    int neighbor_color = perception.at<float>(i, j);
-    bool neighbor_has_factor = neighbor_color >= 6;
-    neighbor_color = neighbor_color % 6;
+    if (matched_candies_src.at<float>(x, y) > 0)
+        return;
 
-    if (neighbor_color == color_index && neighbor_momentum > 0)
+    int color = perception.at<float>(x, y);
+
+    cv::Mat matched_candies(MATRIX_ROWS, MATRIX_COLS, CV_32F);
+    matched_candies_src.copyTo(matched_candies);
+
+    if (color >= 6 && color <= 11)
     {
-        neighbors++;
-        has_factor = has_factor || neighbor_has_factor;
+        // Horizontal candy, all rows are matched
+        for (int i = 0; i < MATRIX_ROWS; i++)
+        {
+            matched_candies.at<float>(i, y) = 1;
+            evaluateCandy(perception, matched_candies, i, y);
+        }
     }
+
+    if (color >= 12 && color <= 17)
+    {
+        // Vertical candy, all columns are matched
+        for (int i = 0; i < MATRIX_COLS; i++)
+        {
+            matched_candies.at<float>(x, i) = 1;
+            evaluateCandy(perception, matched_candies, x, i);
+        }
+    }
+
+    if (color >= 18 && color <= 23)
+    {
+        // Packed candy, 9x9 matrix is matched
+        for (int i = max(0, x - 1); i < min(MATRIX_ROWS, x + 2); i++)
+        {
+            for (int j = max(0, y - 1); j < min(MATRIX_COLS, y + 2); j++)
+            {
+                matched_candies.at<float>(i, j) = 1;
+                evaluateCandy(perception, matched_candies, i, j);
+            }
+        }
+    }
+
+    if (color == 24)
+    {
+        // Black candy, (lets assume all caandies are matched)
+        for (int i = 0; i < MATRIX_ROWS; i++)
+        {
+            for (int j = 0; j < MATRIX_COLS; j++)
+            {
+                matched_candies.at<float>(i, j) = 1;
+            }
+        }
+    }
+
+    matched_candies.at<float>(x, y) = 1;
+
+    matched_candies_src = matched_candies;
 }
 
 // Evaluate momentums update on matches
-int updateMomentum(cv::Mat perception)
+int updateMomentum(cv::Mat &perception, int trig_x = -1, int trig_y = -1)
 {
-    int broken_candies;
+    // Save a record of checked cells in order to prevent from counting the same cell twice
+    cv::Mat matched_cells = cv::Mat::zeros(MATRIX_ROWS, MATRIX_COLS, CV_32F);
 
-    cv::Mat tmp_perception = perception.clone();
+    if (trig_x != -1 && trig_y != -1)
+    {
+        evaluateCandy(perception, matched_cells, trig_x, trig_y);
+    }
 
     for (int i = 0; i < MATRIX_ROWS; i++)
     {
         for (int j = 0; j < MATRIX_COLS; j++)
         {
-            if (tmp_perception.at<float>(i, j) == -1)
+            if (perception.at<float>(i, j) == -1)
                 continue;
 
-            int color = tmp_perception.at<float>(i, j);
+            int color = perception.at<float>(i, j);
 
             if (color == 24)
                 // Not that useful for this case
                 continue;
 
-            bool has_factor = color >= 6;
             int color_index = color % 6;
 
             int neighbors_right = 0;
@@ -566,14 +621,16 @@ int updateMomentum(cv::Mat perception)
             // Vertical matching
             for (int k = i + 1; k < MATRIX_ROWS; k++)
             {
-                int neighbor_color = tmp_perception.at<float>(k, j);
-                bool neighbor_has_factor = neighbor_color >= 6;
-                neighbor_color = neighbor_color % 6;
+                int neighbor_color_src = perception.at<float>(k, j);
+
+                if (neighbor_color_src == -1)
+                    break;
+
+                int neighbor_color = neighbor_color_src % 6;
 
                 if (neighbor_color == color_index)
                 {
                     neighbors_bottom++;
-                    has_factor = has_factor || neighbor_has_factor;
                 }
                 else
                 {
@@ -584,18 +641,16 @@ int updateMomentum(cv::Mat perception)
             // Horizontal matching
             for (int k = j + 1; k < MATRIX_COLS; k++)
             {
-                int neighbor_color = tmp_perception.at<float>(i, k);
+                int neighbor_color_src = perception.at<float>(i, k);
 
-                if (neighbor_color == -1)
+                if (neighbor_color_src == -1)
                     break;
 
-                bool neighbor_has_factor = neighbor_color >= 6;
-                neighbor_color = neighbor_color % 6;
+                int neighbor_color = neighbor_color_src % 6;
 
                 if (neighbor_color == color_index)
                 {
                     neighbors_right++;
-                    has_factor = has_factor || neighbor_has_factor;
                 }
                 else
                 {
@@ -608,10 +663,8 @@ int updateMomentum(cv::Mat perception)
                 // Remove candies
                 for (int k = j; k < j + neighbors_right + 1; k++)
                 {
-                    removeCandy2(tmp_perception, i, k);
+                    evaluateCandy(perception, matched_cells, i, k);
                 }
-
-                broken_candies += neighbors_right;
             }
 
             if (neighbors_bottom >= 2)
@@ -619,13 +672,27 @@ int updateMomentum(cv::Mat perception)
                 // Remove candies
                 for (int k = i; k < i + neighbors_bottom + 1; k++)
                 {
-                    removeCandy2(tmp_perception, k, j);
+                    // cout << "Removing candy at: " << k << " " << j << endl;
+                    evaluateCandy(perception, matched_cells, k, j);
                 }
-
-                broken_candies += neighbors_bottom;
             }
         }
     }
+
+    // Update matched candies
+    for (int i = 0; i < MATRIX_ROWS; i++)
+    {
+        for (int j = 0; j < MATRIX_COLS; j++)
+        {
+            if (matched_cells.at<float>(i, j) > 0)
+            {
+                removeCandy2(perception, i, j);
+            }
+        }
+    }
+
+    // count non zero values in matched cells
+    int broken_candies = cv::countNonZero(matched_cells);
 
     return broken_candies;
 }
@@ -639,26 +706,27 @@ int evaluateMovement(cv::Mat perception, Agent::Movement movement)
     perception = perception.clone();
 
     // Perform the movement
-    int x_offset = (movement.direction == RIGHT) ? 1 : (movement.direction == LEFT) ? -1
-                                                                                    : 0;
-    int y_offset = (movement.direction == UP) ? -1 : (movement.direction == DOWN) ? 1
+    int x_offset = (movement.direction == UP) ? -1 : (movement.direction == DOWN) ? 1
                                                                                   : 0;
-
+    int y_offset = (movement.direction == RIGHT) ? 1 : (movement.direction == LEFT) ? -1
+                                                                                    : 0;
     int temp = perception.at<float>(movement.x, movement.y);
     perception.at<float>(movement.x, movement.y) = perception.at<float>(movement.x + x_offset, movement.y + y_offset);
     perception.at<float>(movement.x + x_offset, movement.y + y_offset) = temp;
 
     // Perform first momentum check
-    if (movement.utility >= 94)
+    if (movement.utility >= 80)
         return movement.utility;
 
     // Remove candies from momentum matrix
     int utility = 0;
 
-    int broken_candies = updateMomentum(perception);
+    int broken_candies = updateMomentum(perception, movement.x, movement.y);
+    utility += broken_candies;
     while (broken_candies > 0)
     {
-        utility += broken_candies = updateMomentum(perception);
+        broken_candies = updateMomentum(perception);
+        utility += broken_candies;
     }
 
     return utility;
@@ -667,13 +735,31 @@ int evaluateMovement(cv::Mat perception, Agent::Movement movement)
 Agent::Movement
 Agent::f2(cv::Mat perception)
 {
-    vector<Agent::Movement> possible_movements = getMovements(perception);
+    // Save the best amount of candies before moving
+    int candies_count[6] = {0, 0, 0, 0, 0, 0};
+
+    for (int i = 0; i < MATRIX_ROWS; i++)
+    {
+        for (int j = 0; j < MATRIX_COLS; j++)
+        {
+            int candy = perception.at<float>(i, j);
+
+            if (candy == 24)
+                continue;
+
+            int factor = (candy % 6) + 1;
+            int color = candy % 6;
+
+            candies_count[color] += factor;
+        }
+    }
+
+    vector<Agent::Movement> possible_movements = getMovements(perception, candies_count);
     int max_utility = -1;
     Agent::Movement best_movement;
 
     for (Agent::Movement movement : possible_movements)
     {
-        cout << "Evaluating movement: " << movement.x << " " << movement.y << " " << movement.direction << endl;
         int utility = evaluateMovement(perception, movement);
 
         if (utility > max_utility)

@@ -22,5 +22,5 @@
 #define DOWN 4
 
 // Close program after a certain amount of time :D
-#define MAX_RUNTIME 270 // Seconds
+#define MAX_RUNTIME 285 // Seconds
 #endif
